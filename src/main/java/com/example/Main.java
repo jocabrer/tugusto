@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -96,7 +97,7 @@ public class Main {
         // Acción del botón Agregar Venta
         addSaleButton.addActionListener(e -> {
             // Lógica para agregar una nueva venta
-            addNewSale();
+            addNewSale(frame);
         });
     }
 
@@ -169,8 +170,40 @@ public class Main {
         JOptionPane.showMessageDialog(frame, detailsPanel, "Detalles de Pedido", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private static void addNewSale() {
-        // Implementar lógica para agregar una nueva venta
-        JOptionPane.showMessageDialog(null, "Nueva venta agregada");
+    private static void addNewSale(JFrame frame) {
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+
+        JLabel numeroBoletaLabel = new JLabel("Número de Boleta:");
+        JTextField numeroBoletaField = new JTextField();
+        JLabel fechaLabel = new JLabel("Fecha:");
+        JTextField fechaField = new JTextField();
+        JLabel valorBoletaLabel = new JLabel("Valor de la Boleta:");
+        JTextField valorBoletaField = new JTextField();
+
+        panel.add(numeroBoletaLabel);
+        panel.add(numeroBoletaField);
+        panel.add(fechaLabel);
+        panel.add(fechaField);
+        panel.add(valorBoletaLabel);
+        panel.add(valorBoletaField);
+
+        int result = JOptionPane.showConfirmDialog(frame, panel, "Agregar Nueva Venta", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String numeroBoleta = numeroBoletaField.getText();
+            String fecha = fechaField.getText();
+            String valorBoleta = valorBoletaField.getText();
+
+            DatabaseConnection dbConnection = new DatabaseConnection();
+            try (Connection connection = dbConnection.connect();
+                    Statement statement = connection.createStatement()) {
+                String query = "INSERT INTO VENTA (NUMERO_BOLETA, FECHA, VALOR_BOLETA) VALUES(" +
+                        numeroBoleta + ", '" + fecha + "', " + valorBoleta + ")";
+                statement.executeUpdate(query);
+                JOptionPane.showMessageDialog(frame, "Nueva venta agregada:\nNúmero de Boleta: " + numeroBoleta + "\nFecha: " + fecha + "\nValor de la Boleta: " + valorBoleta);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(frame, "Error al agregar nueva venta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 }
